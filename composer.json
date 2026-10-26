@@ -1,0 +1,89 @@
+{
+    "name": "wilycode/form",
+    "description": "Typed form fields, fieldsets and collections using independent filter/validator contracts.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "psr/http-message": "^1.1 || ^2.0",
+        "wilycode/filter": "^0.1",
+        "wilycode/validator": "^0.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "wilycode/filters": "^0.1",
+        "wilycode/validators": "^0.1",
+        "nyholm/psr7": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "WilyCode\\Form\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WilyCode\\Form\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Simon Piter"
+        }
+    ],
+    "suggest": {
+        "wilycode/filters": "Ready-to-use standard filters and ImageUploadFieldset normalization.",
+        "wilycode/validators": "Ready-to-use standard validators and ImageUploadFieldset validation."
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/tests",
+            "/examples",
+            "/docs",
+            "/benchmark",
+            "/benchmarks",
+            "/tools",
+            "/phpunit.xml",
+            "/phpunit.xml.dist",
+            "/AGENTS.md",
+            "/CHANGELOG.md",
+            "/CONTRIBUTING.md",
+            "/CODE_OF_CONDUCT.md",
+            "/SECURITY.md",
+            "/composer.lock",
+            "/.github",
+            "/.gitignore",
+            "/.gitattributes",
+            "/.editorconfig",
+            "/.phpunit.cache",
+            "/.phpunit.result.cache",
+            "/phpstan.neon",
+            "/phpstan.neon.dist",
+            "/phpstan.*.neon",
+            "/phpstan.*.neon.dist",
+            "/pint.json",
+            "/rector.php",
+            "/psalm.xml",
+            "/psalm.xml.dist",
+            "/infection.json",
+            "/infection.json.dist"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit -c phpunit.xml"
+    },
+    "keywords": [
+        "wilycode",
+        "form",
+        "php"
+    ],
+    "homepage": "https://github.com/wilycode/form",
+    "support": {
+        "issues": "https://github.com/wilycode/form/issues",
+        "source": "https://github.com/wilycode/form"
+    }
+}
