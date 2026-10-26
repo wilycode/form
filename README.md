@@ -23,7 +23,7 @@
 - [Replacing field definitions](#replacing-field-definitions)
 - [Request data precedence](#request-data-precedence)
 - [Errors and form data](#errors-and-form-data)
-- [Image uploads](#image-uploads)
+- [Optional extensions](#optional-extensions)
 - [API reference](#api-reference)
 - [Development](#development)
 
@@ -276,18 +276,23 @@ Applications remain responsible for CSRF checks, authorization, persisting uploa
 
 Error messages use codes such as `validation.not_empty.required`; applications can translate and render these codes with their own presentation layer.
 
-## Image uploads
+## Optional extensions
 
-`ImageUploadFieldset` is an optional convenience fieldset for asynchronous image upload forms. It relies on `wilycode/filters` and `wilycode/validators`, and exposes `file`, `token`, `existingId`, `remove` and `crop` values.
+The core library includes fields, fieldsets, collections, filtering and validation **contracts**. It does not ship image-upload fieldsets or require the ready-made `wilycode/filters` and `wilycode/validators` packages at runtime.
+
+For an asynchronous image upload fieldset, install the separate **[`wilycode/form-image-upload`](https://github.com/wilycode/form-image-upload)** package:
+
+```bash
+composer require wilycode/form-image-upload
+```
 
 ```php
-use WilyCode\Form\Fieldsets\ImageUploadFieldset;
+use WilyCode\FormImageUpload\ImageUploadFieldset;
 
-$this->add(new ImageUploadFieldset('featuredImage'));
 $this->add(new ImageUploadFieldset('avatar'));
 ```
 
-The application must resolve temporary upload tokens, validate storage permissions and persist or remove files. The form package does not write uploads to disk.
+This extension installs its own required filters and validators and handles only form data (`file`, `token`, `existingId`, `remove` and crop coordinates). Upload transport, file storage and authorization remain the application's responsibility.
 
 ## API reference
 
@@ -301,7 +306,6 @@ The application must resolve temporary upload tokens, validate storage permissio
 | `FormMethod` | HTTP method enum (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`). |
 | `Options` | Selected and custom options. |
 | `FieldCompareValidator` | Compare two values in the same configured fieldset or form context. |
-| `ImageUploadFieldset` | Optional async image upload data representation. |
 
 ## Development
 

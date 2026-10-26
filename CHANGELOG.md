@@ -10,7 +10,6 @@ All notable changes to WilyCode Form are documented here.
 - Filters at field, group and default-field scope, with removal and inheritance APIs.
 - Reusable validation rules, structured errors and group/collection error paths.
 - PSR-7 request support, upload data merging, and `isSubmittedAndValid()`.
-- Optional `ImageUploadFieldset` for image upload metadata and crop values.
 - WilyCode Filter/Validator contracts integration; optional ready-made implementations.
 - Automated PHPUnit tests and CI for PHP 8.4/8.5.
 
@@ -28,4 +27,4 @@ All notable changes to WilyCode Form are documented here.
 
 ### Documentation
 
-- Describe filter scopes, Add/Edit inheritance, nested collection rules, request precedence, options, image uploads and extension points.
+- Describe filter scopes, Add/Edit inheritance, nested collection rules, request precedence, options and optional extensions.

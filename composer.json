@@ -31,8 +31,9 @@
         }
     ],
     "suggest": {
-        "wilycode/filters": "Ready-to-use standard filters and ImageUploadFieldset normalization.",
-        "wilycode/validators": "Ready-to-use standard validators and ImageUploadFieldset validation."
+        "wilycode/filters": "Optional ready-made field filters; not required by form core.",
+        "wilycode/validators": "Optional ready-made field validators; not required by form core.",
+        "wilycode/form-image-upload": "Separate, optional image-upload metadata fieldset."
     },
     "extra": {
         "branch-alias": {
