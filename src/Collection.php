@@ -159,6 +159,9 @@ class Collection extends AbstractFormGroup implements FieldInterface
         $values = [];
         foreach ($this->list as $index => $data) {
             foreach ($data as $name => $field) {
+                if ($field instanceof Field && $field->isTransparent()) {
+                    continue;
+                }
                 $values[$index][$name] = $field->getData();
             }
         }
