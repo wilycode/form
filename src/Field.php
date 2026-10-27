@@ -22,6 +22,7 @@ class Field implements FieldInterface
     private ?array $options = null;
     private mixed $emptyValue = '';
     private bool $required;
+    private bool $transparent = false;
     private bool $multiple = false;
     private bool $customValuesAllowed = false;
     private bool $invalidMultipleData = false;
@@ -71,6 +72,18 @@ class Field implements FieldInterface
     {
         $this->required = false;
         return $this;
+    }
+
+    /** Exclude from aggregate form data, but still accept and validate the field. */
+    public function transparent(bool $transparent = true): static
+    {
+        $this->transparent = $transparent;
+        return $this;
+    }
+
+    public function isTransparent(): bool
+    {
+        return $this->transparent;
     }
 
     public function isRequired(): bool
