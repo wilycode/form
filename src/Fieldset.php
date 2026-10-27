@@ -160,6 +160,9 @@ class Fieldset extends AbstractFormGroup implements FieldInterface
         $values = [];
 
         foreach ($this->list as $field) {
+            if ($field instanceof Field && $field->isTransparent()) {
+                continue;
+            }
             $values[$field->getName()] = $field->getData();
         }
 

@@ -22,6 +22,7 @@
 - [Nested fieldsets and collections](#nested-fieldsets-and-collections)
 - [Replacing field definitions](#replacing-field-definitions)
 - [Request data precedence](#request-data-precedence)
+- [Transparent fields](#transparent-fields)
 - [Errors and form data](#errors-and-form-data)
 - [Optional extensions](#optional-extensions)
 - [API reference](#api-reference)
@@ -261,6 +262,29 @@ Collection-row cloning starts with fresh validator errors and no manual errors i
 - Uploaded files override matching body values. Nested associative fields and corresponding numeric-indexed rows merge so uploads do not erase unrelated data in the same row. An empty uploads array replaces the matching body value.
 
 Applications remain responsible for CSRF checks, authorization, persisting uploads and protecting against excessive input size or collection row counts. Merely using this library does not perform those security checks.
+
+## Transparent fields
+
+Fields can be excluded from aggregate form data while continuing to accept
+submitted values and participate in validation. This is useful for CSRF tokens
+and other technical fields.
+
+```php
+$form->add((new Field('_csrf'))->transparent());
+$form->setData(['name' => 'Jan', '_csrf' => 'example-token']);
+$form->isValid(); // Validates the transparent field too.
+$form->getData(); // Includes name, but not _csrf.
+$form->getDataByName('_csrf'); // Reads the submitted value.
+```
+
+The same behavior applies inside nested fieldsets and collection rows.
+Transparent fields are still part of `getErrors()`, and their own
+`Field::getData()` still returns the submitted value. To restore inclusion,
+call `$field->transparent(false)`. `Form::getDataWithExcludes()` also omits
+transparent fields because it works from `getData()`.
+
+Use `$this->add($field)` to register custom subclasses of `Field`; the core
+`addField()` convenience method accepts only a field name.
 
 ## Errors and form data
 

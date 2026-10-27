@@ -99,6 +99,9 @@ abstract class Form extends AbstractFormGroup
     {
         $values = [];
         foreach ($this->getDefinedElements() as $name => $element) {
+            if ($element instanceof Field && $element->isTransparent()) {
+                continue;
+            }
             $values[$name] = $element->getData();
         }
 
