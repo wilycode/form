@@ -17,6 +17,9 @@ abstract class AbstractFormGroup implements GetterInterface
     use HtmlPathTrait;
 
     private string $name = '';
+    /** A local override takes precedence over any inherited configuration. */
+    private ?bool $stopOnFirstError = null;
+    private bool $inheritedStopOnFirstError = true;
 
     /** @var array<class-string<FilterInterface>, FilterInterface> */
     private array $generalFilters = [];
@@ -50,6 +53,51 @@ abstract class AbstractFormGroup implements GetterInterface
 
     /** @var array<int|string, mixed> */
     protected array $errors = [];
+
+    /**
+     * Configure whether each field stops at its first failing validator.
+     * Applies to existing and future fields, fieldsets and collection rows.
+     */
+    public function setStopOnFirstError(bool $stop): static
+    {
+        $this->stopOnFirstError = $stop;
+        $this->propagateStopOnFirstError();
+        return $this;
+    }
+
+    public function isStopOnFirstError(): bool
+    {
+        return $this->stopOnFirstError ?? $this->inheritedStopOnFirstError;
+    }
+
+    /** @internal Apply an ancestor's policy without overriding this group's local choice. */
+    public function inheritStopOnFirstError(bool $stop): void
+    {
+        $this->inheritedStopOnFirstError = $stop;
+        $this->propagateStopOnFirstError();
+    }
+
+    private function propagateStopOnFirstError(): void
+    {
+        $stop = $this->isStopOnFirstError();
+
+        foreach ($this->getDefinedElements() as $element) {
+            $element->inheritStopOnFirstError($stop);
+        }
+
+        // Apply configuration also when a caller updates an already populated group.
+        if ($this instanceof Fieldset) {
+            foreach ($this->getList() as $element) {
+                $element->inheritStopOnFirstError($stop);
+            }
+        } elseif ($this instanceof Collection) {
+            foreach ($this->getList() as $row) {
+                foreach ($row as $element) {
+                    $element->inheritStopOnFirstError($stop);
+                }
+            }
+        }
+    }
 
     public function getName(): string
     {
@@ -263,6 +311,8 @@ abstract class AbstractFormGroup implements GetterInterface
         }
 
         $this->copyDefaultFieldFilterConfigurationFrom($source);
+        $this->stopOnFirstError = $source->stopOnFirstError;
+        $this->inheritedStopOnFirstError = $source->inheritedStopOnFirstError;
         $this->addedGeneralErrors = [];
         $this->generalErrors = [];
         $this->errors = [];
@@ -389,18 +439,21 @@ abstract class AbstractFormGroup implements GetterInterface
         if ($element instanceof Field) {
             $this->assertElementNameAvailable($element->getName(), 'field');
             $this->applyDefaultFieldFilters($element);
+            $element->inheritStopOnFirstError($this->isStopOnFirstError());
             $this->fields[$element->getName()] = $element;
         }
 
         if ($element instanceof Fieldset) {
             $this->assertElementNameAvailable($element->getName(), 'fieldset');
             $element->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+            $element->inheritStopOnFirstError($this->isStopOnFirstError());
             $this->fieldsets[$element->getName()] = $element;
         }
 
         if ($element instanceof Collection) {
             $this->assertElementNameAvailable($element->getName(), 'collection');
             $element->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+            $element->inheritStopOnFirstError($this->isStopOnFirstError());
             $this->collections[$element->getName()] = $element;
         }
 
@@ -412,6 +465,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $this->assertElementNameAvailable($name, 'field');
         $field = new Field($name, $required);
         $this->applyDefaultFieldFilters($field);
+        $field->inheritStopOnFirstError($this->isStopOnFirstError());
         $this->fields[$field->getName()] = $field;
         $this->syncChildPath($field);
 
@@ -452,6 +506,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $indexed = $this->indexElementsByName($fields, 'field');
         foreach ($indexed as $field) {
             $this->applyDefaultFieldFilters($field);
+            $field->inheritStopOnFirstError($this->isStopOnFirstError());
         }
 
         $this->fields = $indexed;
@@ -486,6 +541,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $this->assertElementNameAvailable($name, 'fieldset');
         $fieldset = new Fieldset($name, $required);
         $fieldset->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+        $fieldset->inheritStopOnFirstError($this->isStopOnFirstError());
         $this->fieldsets[$fieldset->getName()] = $fieldset;
         $this->syncChildPath($fieldset);
 
@@ -505,6 +561,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $indexed = $this->indexElementsByName($fieldsets, 'fieldset');
         foreach ($indexed as $fieldset) {
             $fieldset->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+            $fieldset->inheritStopOnFirstError($this->isStopOnFirstError());
         }
 
         $this->fieldsets = $indexed;
@@ -545,6 +602,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $indexed = $this->indexElementsByName($collections, 'collection');
         foreach ($indexed as $collection) {
             $collection->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+            $collection->inheritStopOnFirstError($this->isStopOnFirstError());
         }
 
         $this->collections = $indexed;
@@ -557,6 +615,7 @@ abstract class AbstractFormGroup implements GetterInterface
         $this->assertElementNameAvailable($name, 'collection');
         $collection = new Collection($name, $required);
         $collection->inheritDefaultFieldFilters($this->cloneDefaultFieldFilters());
+        $collection->inheritStopOnFirstError($this->isStopOnFirstError());
         $this->collections[$collection->getName()] = $collection;
         $this->syncChildPath($collection);
 

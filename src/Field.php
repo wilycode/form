@@ -27,6 +27,9 @@ class Field implements FieldInterface
     private bool $customValuesAllowed = false;
     private bool $invalidMultipleData = false;
     private ErrorBag $errors;
+    /** Local override; null inherits the enclosing group's policy. */
+    private ?bool $stopOnFirstError = null;
+    private bool $inheritedStopOnFirstError = true;
 
     /** @var array<class-string<ValidatorInterface>, ValidatorInterface> */
     private array $validators = [];
@@ -128,6 +131,27 @@ class Field implements FieldInterface
     public function getValidators(): array
     {
         return $this->validators;
+    }
+
+    /**
+     * Stop after the first failing validator for this field (default: true).
+     * Other form fields are always validated independently.
+     */
+    public function setStopOnFirstError(bool $stop): self
+    {
+        $this->stopOnFirstError = $stop;
+        return $this;
+    }
+
+    public function isStopOnFirstError(): bool
+    {
+        return $this->stopOnFirstError ?? $this->inheritedStopOnFirstError;
+    }
+
+    /** @internal Inherit group policy without replacing an explicit field override. */
+    public function inheritStopOnFirstError(bool $stop): void
+    {
+        $this->inheritedStopOnFirstError = $stop;
     }
 
     public function addValidator(ValidatorInterface $validator): self
@@ -507,8 +531,8 @@ class Field implements FieldInterface
 
         foreach ($this->getValidators() as $validator) {
             if (!$this->validateValue($this->getData(), $validator, $this->errors)
-                && $validator->isStop()) {
-                return false;
+                && ($this->isStopOnFirstError() || $validator->isStop())) {
+                break;
             }
         }
 
