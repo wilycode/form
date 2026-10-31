@@ -119,6 +119,33 @@ $field->setDefaultFilters([new TrimFilter()]);
 
 On `Field` and form groups, `addValidator()`, `getValidator()`, `hasValidator()` and `removeValidator()` manage validators. `addValidator()` replaces an existing validator of the same concrete class. Call `setValidators()` to replace the entire set.
 
+### Stop on the first field validation error
+
+By default, a form validates **all of its fields**, but each field stops after its **first failing validator**. This prevents multiple messages for the same field. Existing validator rules do not need `setStop(true)`:
+
+```php
+$this->addField('first_name')
+    ->addValidator(new StringValidator())
+    ->addValidator(new StringLengthValidator()->setMin(1)->setMax(120));
+```
+
+To collect every validator error per field, change the form policy:
+
+```php
+$this->setStopOnFirstError(false);
+```
+
+Override the form policy for an individual field or nested group:
+
+```php
+$this->getField('password')->setStopOnFirstError(true);
+$this->getFieldset('profile')->setStopOnFirstError(false);
+```
+
+The setting is inherited by existing and future fields, nested fieldsets and collection rows, unless explicitly overridden. Changing it also affects already populated collection rows. Independent field validation continues even after another field fails. An explicit validator-level `setStop(true)` **always** stops the field's remaining validators, including when the form policy is `false`; standalone `wilycode/validator` behavior is unchanged. Built-in required/type/option checks can still fail before custom validators.
+
+**Migration from v0.1.x:** Forms that relied on collecting every error from multiple validators attached to the same field should explicitly call `$this->setStopOnFirstError(false)`. This is a behavior change in v0.2.0.
+
 ### Notes about mutable rules
 
 When nested collection rows are created, the library copies the field, filter and validator instances so one row's validation state does not interfere with another. A `FieldCompareValidator` bound to a **fieldset or collection** is rebound to the corresponding cloned fieldset or individual collection row; see the examples below. If you need the same validator class multiple times on a single field, wrap or compose validators explicitly—only one instance of each concrete class is stored.
